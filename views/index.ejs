@@ -23,6 +23,11 @@
       border-radius: 10px;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     }
+    .advanced-options {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #dee2e6;
+    }
   </style>
 </head>
 <body>
@@ -56,14 +61,97 @@
           >
           <div class="form-text">输入网站的Sitemap XML文件的URL，支持sitemap_index.xml</div>
         </div>
+
+        <div class="mb-3">
+          <a 
+            class="btn btn-link p-0" 
+            data-bs-toggle="collapse" 
+            href="#advancedOptions" 
+            role="button" 
+            aria-expanded="false" 
+            aria-controls="advancedOptions"
+          >
+            显示高级选项
+          </a>
+          
+          <div class="collapse" id="advancedOptions">
+            <div class="advanced-options">
+              <div class="mb-3">
+                <label for="delayMin" class="form-label">最小页面间隔时间 (毫秒)</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="delayMin" 
+                  name="delayMin" 
+                  placeholder="默认: 3000"
+                  min="1000"
+                >
+                <div class="form-text">页面间最小延迟时间</div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="delayMax" class="form-label">最大页面间隔时间 (毫秒)</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="delayMax" 
+                  name="delayMax" 
+                  placeholder="默认: 10000"
+                  min="3000"
+                >
+                <div class="form-text">页面间最大延迟时间</div>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label">模拟人类行为</label>
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="radio" 
+                    name="simulateHuman" 
+                    id="simulateHumanYes" 
+                    value="true"
+                    checked
+                  >
+                  <label class="form-check-label" for="simulateHumanYes">
+                    是
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="radio" 
+                    name="simulateHuman" 
+                    id="simulateHumanNo" 
+                    value="false"
+                  >
+                  <label class="form-check-label" for="simulateHumanNo">
+                    否
+                  </label>
+                </div>
+                <div class="form-text">自动滚动和随机停顿，模拟真实用户</div>
+              </div>
+              
+              <div class="mb-3">
+                <p class="mb-1">更多高级设置请前往 <a href="/config">配置页面</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-primary" <%= taskState.isRunning ? 'disabled' : '' %>>
           开始处理
         </button>
+        
+        <a href="/config" class="btn btn-outline-secondary">
+          高级配置
+        </a>
       </form>
     </div>
 
     <footer class="mt-4 text-center text-muted">
       <p>TranslatePress激活工具 &copy; <%= new Date().getFullYear() %></p>
+      <p><small>工具会采取防反爬虫措施，包括随机延迟、模拟人类行为等</small></p>
     </footer>
   </div>
 

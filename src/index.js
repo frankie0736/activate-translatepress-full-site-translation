@@ -25,6 +25,16 @@ const taskState = {
   error: null
 };
 
+// 访问配置
+const visitOptions = {
+  delayMin: 3000,            // 页面间最小延迟（毫秒）
+  delayMax: 10000,           // 页面间最大延迟（毫秒）
+  loadWaitTime: 5000,        // 页面加载后等待时间（毫秒）
+  simulateHuman: true,       // 是否模拟人类行为
+  maxConcurrent: 1,          // 最大并发数量（建议为1）
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+};
+
 // 主页路由
 app.get('/', (req, res) => {
   res.render('index', { taskState });
@@ -32,7 +42,7 @@ app.get('/', (req, res) => {
 
 // 提交sitemap URL的路由
 app.post('/process-sitemap', async (req, res) => {
-  const { sitemapUrl } = req.body;
+  const { sitemapUrl, delayMin, delayMax, simulateHuman } = req.body;
   
   if (!sitemapUrl) {
     return res.status(400).json({ error: '请提供有效的sitemap URL' });
@@ -41,6 +51,11 @@ app.post('/process-sitemap', async (req, res) => {
   if (taskState.isRunning) {
     return res.status(409).json({ error: '任务已在执行中' });
   }
+
+  // 更新配置（如果用户提供了参数）
+  if (delayMin) visitOptions.delayMin = parseInt(delayMin);
+  if (delayMax) visitOptions.delayMax = parseInt(delayMax);
+  if (simulateHuman !== undefined) visitOptions.simulateHuman = simulateHuman === 'true';
 
   // 重置状态
   taskState.isRunning = true;
@@ -58,7 +73,7 @@ app.post('/process-sitemap', async (req, res) => {
     res.redirect('/progress');
     
     // 异步访问所有URL
-    visitAllUrls(urls, taskState).catch(err => {
+    visitAllUrls(urls, taskState, visitOptions).catch(err => {
       console.error('访问URL出错:', err);
       taskState.error = err.message;
       taskState.isRunning = false;
@@ -76,6 +91,25 @@ app.get('/progress', (req, res) => {
   res.render('progress', { taskState });
 });
 
+// 配置页面路由
+app.get('/config', (req, res) => {
+  res.render('config', { options: visitOptions });
+});
+
+// 更新配置路由
+app.post('/update-config', (req, res) => {
+  const { delayMin, delayMax, loadWaitTime, simulateHuman, maxConcurrent, userAgent } = req.body;
+  
+  if (delayMin) visitOptions.delayMin = parseInt(delayMin);
+  if (delayMax) visitOptions.delayMax = parseInt(delayMax);
+  if (loadWaitTime) visitOptions.loadWaitTime = parseInt(loadWaitTime);
+  if (simulateHuman !== undefined) visitOptions.simulateHuman = simulateHuman === 'true';
+  if (maxConcurrent) visitOptions.maxConcurrent = parseInt(maxConcurrent);
+  if (userAgent) visitOptions.userAgent = userAgent;
+  
+  res.redirect('/');
+});
+
 // API端点，返回当前任务状态
 app.get('/api/status', (req, res) => {
   res.json({
@@ -84,7 +118,8 @@ app.get('/api/status', (req, res) => {
     visitedCount: taskState.visitedUrls.length,
     visitedUrls: taskState.visitedUrls,
     currentUrl: taskState.currentUrl,
-    error: taskState.error
+    error: taskState.error,
+    options: visitOptions
   });
 });
 
